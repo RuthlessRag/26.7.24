@@ -1,0 +1,17 @@
+# CCS build output
+empty_LP_MSPM0G3507_nortos_ticlang/Debug/
+empty_LP_MSPM0G3507_nortos_ticlang/Release/
+*.o
+*.d
+*.obj
+*.out
+*.hex
+*.map
+
+# Eclipse/CCS workspace metadata
+.metadata/
+
+# OS junk
+Thumbs.db
+.DS_Store
+desktop.ini
