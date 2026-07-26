@@ -9,6 +9,7 @@
 #include "encoder.h"
 #include "xunji.h"
 #include "oled.h"
+#include "MPU6050.h"
 #define ABS(a)      (a>0 ? a:(-a))
 typedef int32_t  s32;
 typedef int16_t s16;

@@ -11,10 +11,10 @@ extern volatile uint8_t Gray_Data[8];
 //巡线闭环给 Velocity_A/Velocity_B 的目标转速(RPM)，由 Line_Track_Task 每次调用后刷新
 extern int Target_RPM_A, Target_RPM_B;
 
-//当前巡线偏差，调试/OLED显示可以直接读
-extern int8_t Track_Err;
+//当前左右触线数量差(右-左)，调试/OLED显示可以直接读，不参与控制
+extern float Track_Err;
 
-//在main()的while(1)里循环调用；内部会阻塞扫描8路灰度(约8ms)，遇到急转弯分支会阻塞多等250~300ms
+//在main()的while(1)里循环调用；内部会阻塞扫描8路灰度(约8ms)，不再有额外的原地转弯阻塞延时
 void Line_Track_Task(void);
 
 #endif

@@ -47,6 +47,7 @@ int main(void)
 	NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
 	NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
 	OLED_Init();//初始化OLED，显示巡线调试信息
+	MPU6050_initialize();//初始化MPU6050，之后Yaw角度由TIMER_0_INST_IRQHandler里每10ms调用一次MPU6050_Update_Yaw()积分更新
     while (1)
     {
 		Line_Track_Task();//ɨ��8·�ҶȲ����ó�Ŀ��ת��Target_RPM_A/B����ʱ��ֹ8~300ms��
@@ -61,7 +62,7 @@ int main(void)
 		OLED_ShowString(0,12,(uint8_t*)oled_buf);
 		sprintf(oled_buf,"MA:%-4d MB:%-4d",(int)MA_RPM,(int)MB_RPM);
 		OLED_ShowString(0,24,(uint8_t*)oled_buf);
-		sprintf(oled_buf,"ERR:%d",Track_Err);
+		sprintf(oled_buf,"ERR:%.1f",Track_Err);
 		OLED_ShowString(0,36,(uint8_t*)oled_buf);
 		OLED_Refresh_Gram();
     }
@@ -76,13 +77,14 @@ void TIMER_0_INST_IRQHandler(void)
         {
 			LED_Flash(100);//led��˸
 			Key();//��ȡ��ǰBLS����״̬
-			MA_RPM=Calculate_Motor_RPM(Get_Encoder_countA, 10);//���㵱ǰA������ת��     ��λ:תÿ����
-			MB_RPM=Calculate_Motor_RPM(-Get_Encoder_countB, 10);//���㵱ǰB������ת��      ��λ:תÿ����
+			MPU6050_Update_Yaw(0.01f);//每10ms积分一次陀螺仪Z轴角速度，要跟这个定时中断的周期对应
+			MA_RPM=Calculate_Motor_RPM(-Get_Encoder_countA, 10);//计算当前A轮转速，加负号配合motor.c里AIN方向对调
+			MB_RPM=Calculate_Motor_RPM(Get_Encoder_countB, 10);//计算当前B轮转速，去掉原来的负号配合motor.c里BIN方向对调
 			Get_Encoder_countA=Get_Encoder_countB=0;
 			if(!Flag_Stop)//����BLS������رյ��
 			{	//Velocity_A(Ŀ���ٶȣ�ʵ���ٶ�)
-				PWMA = -Velocity_A(Target_RPM_A,MA_RPM);//PID�ջ�����ת��,��λ:תÿ����
-				PWMB = -Velocity_B(Target_RPM_B,MB_RPM);//PID�ջ�����ת��,��λ:תÿ����
+				PWMA = -Velocity_A(Target_RPM_A,MA_RPM);//PID闭环控制转速,单位:转每分钟
+				PWMB = -Velocity_B(Target_RPM_B,MB_RPM);//PID闭环控制转速,单位:转每分钟
 				//PWMռ�ձ�ȡֵ��Χ�Լ��޷�
 				PWMA=limit_PWM(PWMA,-7999,7999);
 				PWMB=limit_PWM(PWMB,-7999,7999);
