@@ -3,12 +3,13 @@
 #define ACTIVE_LEVEL GRAYSCALE_ACTIVE_LEVEL
 
 //简化为"多个触发才转弯，否则写死直行"的阈值控制，不再用加权平均+PID连续修正(太容易被单个探头的抖动带偏)
-#define LINETRACK_BASE_RPM   30.0f   //直行基准转速
+#define LINETRACK_BASE_RPM   42.0f   //直行基准转速，30->35->42->38->42，再快一点
 #define TURN_OUTER_RPM       40.0f   //转弯时外侧轮目标转速，比直行基准转速高，加快甩头
 #define TURN_INNER_RPM      -10.0f   //转弯时内侧轮目标转速，负值=反转原地掉头，0=内轮停转，正的小值=内轮慢速前进；转不过弯就把这个调得更负
 #define MULTI_THRESHOLD         3    //一侧超过这个数量(即4个，一侧全触线)才转弯；否则忽略、直行
-#define APPROACH_LOOPS           5   //探头阵列比两轮轴心靠前，检测到拐角时轮轴还没到拐角上；先直行这么多次循环(每次约8ms)让轮轴再往前凑一凑，再开始原地转向，否则转完车身会偏离新线
-#define TURN_YAW_THRESHOLD    85.0f  //车上装了MPU6050陀螺仪，转弯时用yaw角度累计变化量判断是否转够角度，比猜传感器图案更准；90度留5度余量
+#define APPROACH_LOOPS          10   //探头阵列比两轮轴心靠前，检测到拐角时轮轴还没到拐角上；先直行这么多次循环(每次约8ms)让轮轴再往前凑一凑，再开始原地转向，否则转完车身会偏离新线；5->8->12->10，12有点多往回收一点
+#define TURN_YAW_THRESHOLD    65.0f  //车上装了MPU6050陀螺仪，转弯时用yaw角度累计变化量判断是否转够角度，比猜传感器图案更准；
+                                      //85->75->60->65，60转得稍微欠了一点点，往上加一点点
 #define STRAIGHT_STEER_GAIN   1.5f   //直行时的微修正增益(RPM/个)，按左右触线数量差算，只用来防止小幅跑偏，不追求消除偏差；原来3.0太猛，差1个探头就大修正，来回小摆动，调柔和点
 #define STRAIGHT_STEER_LIMIT  9.0f   //直行微修正的限幅(RPM)，避免异常读数导致修正过猛
 
